@@ -1,0 +1,77 @@
+/* styles.css */
+
+/* Container styles */
+.container {
+    width: 40%;
+    position: absolute;
+    top: 25%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-family: 'Times New Roman', serif;
+    /* Updated font-family to Times New Roman */
+}
+
+/* Search section styles */
+.search-section {
+    background-color: #fcde9f;
+    padding: 16px;
+    border-radius: 8px;
+    font-family: 'Times New Roman', serif;
+    /* Add font-family to search section */
+    color: #661d03;
+    /* Add text color to search section */
+}
+
+/* Button styles */
+button {
+    color: #fff;
+    transition: background-color 0.3s ease;
+    font-family: 'Times New Roman', serif;
+    /* Updated font-family to Times New Roman */
+}
+
+button:hover {
+    background-color: #661d03;
+    ;
+}
+
+/* Checkbox styles */
+.MuiFormControlLabel-label {
+    color: #661d03;
+}
+
+/* Text field styles */
+.MuiFormControl-root {
+    width: 100%;
+}
+
+.MuiInputBase-root,
+.MuiInputLabel-root,
+.MuiSelect-root,
+.MuiCheckbox-root {
+    background-color: #fde7be;
+}
+
+/* Select styles */
+.MuiInputLabel-root {
+    color: #661d03;
+}
+
+/* Apply styles to select when focused */
+.MuiInputLabel-root.Mui-focused {
+    color: #661d03;
+}   
+
+/* Responsive Styles */
+@media (max-width: 600px) {
+    .container {
+        padding: 8px;
+        max-width: 100%;
+    }
+
+    button {
+        width: 100%;
+    }
+
+    /* Add more responsive styles as needed */
+}

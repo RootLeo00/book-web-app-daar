@@ -1,0 +1,27 @@
+/* layout.css */
+
+/* Body styles */
+body {
+    overflow: scroll;
+    background-image: url(../images/background_image.jpg);
+    height: 100vh; /* Full viewport height */
+    margin: 0;
+    font-family: 'Times New Roman', serif; /* Updated font-family to Times New Roman */
+  
+    /* Center and scale the image nicely */
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+  }
+  
+  /* Layout styles */
+  .layout {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: #661d03; /* Updated text color to #661d03 */
+  }
+
+
