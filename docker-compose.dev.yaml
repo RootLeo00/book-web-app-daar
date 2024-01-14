@@ -7,14 +7,32 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8080:8080"  # Expose the frontend on port 80
-
-  # backend:
-  #   image: node:14  # Replace with your backend image
-  #   environment:
-  #     - NODE_ENV=production
-  #   volumes:
-  #     - ./path/to/backend:/usr/src/app  # Mount the backend code
-  #   working_dir: /usr/src/app
-  #   command: node index.js  # Replace with your backend start command
-  #   ports:
-  #     - "3000:3000"  # Expose the backend on port 3000
+    environment:
+      - DATABASE_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@database:5432/${POSTGRES_DB}
+    depends_on:
+      - database
+  database:
+    image: postgres:latest
+    volumes:
+      - postgres_data:/var/lib/postgresql/data # Have the data volume mounted so it will be persistent
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    ports:
+      - "5432:5432"
+  pgadmin:
+    image: dpage/pgadmin4
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${POSTGRES_USER}@gmail.com # PGAdmin requires an email, for now this email can be a nonexisting one.
+      PGADMIN_DEFAULT_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "8888:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    depends_on:
+      - database
+volumes:
+  postgres_data:
+  pgadmin_data:
