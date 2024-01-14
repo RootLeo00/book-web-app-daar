@@ -3,6 +3,7 @@ package backend
 import (
 	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/gorilla/mux"
 	"gorm.io/gorm"
@@ -20,7 +21,7 @@ func RegisterHandler(router *mux.Router, db *gorm.DB) error {
 	// Set handlers
 	router.HandleFunc("/", h.IndexHandler)
 
-	router.HandleFunc("/books/", h.GetBooksHandler)
+	router.HandleFunc("/books", h.GetBooksHandler)
 	router.HandleFunc("/books/{id}", h.GetBooksIDHandler)
 
 	router.HandleFunc("/Search/{query}", h.SearchHandler)
@@ -30,18 +31,45 @@ func RegisterHandler(router *mux.Router, db *gorm.DB) error {
 }
 
 // index /
+// Done
 func (h *handler) IndexHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Server online")
 }
 
 // get books
+// Done
 func (h *handler) GetBooksHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Get book")
+	var books []Book
+
+	h.db.Find(&books)
+
+	Ok200(books, w)
 }
 
 // get book with id
+// Done
 func (h *handler) GetBooksIDHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "get book with id")
+	vars := mux.Vars(r)
+	var idString string
+	var ok bool
+
+	if idString, ok = vars["id"]; !ok {
+		Error400Response(w)
+		return
+	}
+
+	id, err := strconv.Atoi(idString)
+
+	if err != nil {
+		Error400Response(w)
+		return
+	}
+
+	var book *Book
+
+	h.db.First(book, id)
+
+	Ok200(book, w)
 }
 
 // search
