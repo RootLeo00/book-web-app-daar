@@ -20,13 +20,13 @@ func RegisterHandler(router *mux.Router, db *gorm.DB) error {
 	}
 
 	// Set handlers
-	router.HandleFunc("/", h.IndexHandler)
+	router.HandleFunc("/", h.IndexHandler).Methods("GET")
 
-	router.HandleFunc("/books", h.GetBooksHandler)
-	router.HandleFunc("/books/{id}", h.GetBooksIDHandler)
+	router.HandleFunc("/books", h.GetBooksHandler).Methods("GET")
+	router.HandleFunc("/books/{id}", h.GetBooksIDHandler).Methods("GET")
 
-	router.HandleFunc("/Search/{query}", h.SearchHandler)
-	router.HandleFunc("/RegexSearch/{regex}", h.RegexSearchHandler)
+	router.HandleFunc("/Search/{query}", h.SearchHandler).Methods("GET")
+	router.HandleFunc("/RegexSearch/{regex}", h.RegexSearchHandler).Methods("GET")
 
 	return nil
 }
