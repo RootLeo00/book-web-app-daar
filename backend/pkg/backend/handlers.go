@@ -1,12 +1,9 @@
 package backend
 
 import (
-	"encoding/json"
-	"fmt"
 	"net/http"
-	"strconv"
 
-	"github.com/gorilla/mux"
+	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
 
@@ -14,119 +11,108 @@ type handler struct {
 	db *gorm.DB
 }
 
-func RegisterHandler(router *mux.Router, db *gorm.DB) error {
+func RegisterHandler(router *gin.Engine, db *gorm.DB) error {
 	h := &handler{
 		db: db,
 	}
 
 	// Set handlers
-	router.HandleFunc("/", h.IndexHandler).Methods("GET")
+	router.GET("/", h.IndexHandler)
 
-	router.HandleFunc("/books", h.GetBooksHandler).Methods("GET")
-	router.HandleFunc("/books/{id}", h.GetBooksIDHandler).Methods("GET")
+	router.GET("/books", h.GetBooksHandler)
+	router.GET("/books/:id", h.GetBooksIDHandler)
 
-	router.HandleFunc("/Search/{query}", h.SearchHandler).Methods("GET")
-	router.HandleFunc("/RegexSearch/{regex}", h.RegexSearchHandler).Methods("GET")
+	router.GET("/Search/:query", h.SearchHandler)
+	router.GET("/RegexSearch/:regex", h.RegexSearchHandler)
 
 	return nil
 }
 
 // index /
 // Done
-func (h *handler) IndexHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Server online")
+func (h *handler) IndexHandler(context *gin.Context) {
+	context.JSON(http.StatusOK, "Server Online")
 }
 
 // get books
 // Done
-func (h *handler) GetBooksHandler(w http.ResponseWriter, r *http.Request) {
+func (h *handler) GetBooksHandler(context *gin.Context) {
 	var books []Book
 
 	h.db.Find(&books)
 
-	Ok200(books, w)
+	context.JSON(http.StatusOK, books)
 }
 
 // get book with id
 // Done
-func (h *handler) GetBooksIDHandler(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	var idString string
-	var ok bool
+func (h *handler) GetBooksIDHandler(context *gin.Context) {
+	// vars := mux.Vars(r)
+	// var id string
+	// var ok bool
 
-	if idString, ok = vars["id"]; !ok {
-		Error400Response(w)
-		return
-	}
+	// if id, ok = vars["id"]; !ok {
+	// 	context.JSON(http.StatusInternalServerError, "Cannot get the id")
+	// 	return
+	// }
 
-	id, err := strconv.Atoi(idString)
+	// var book *Book
 
-	if err != nil {
-		Error400Response(w)
-		return
-	}
+	// h.db.First(book, id)
 
-	var book *Book
-
-	h.db.First(book, id)
-
-	Ok200(book, w)
+	context.JSON(http.StatusOK, []Book{})
 }
 
 // search
-func (h *handler) SearchHandler(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	var query string
-	var ok bool
+func (h *handler) SearchHandler(context *gin.Context) {
+	// if query, ok = vars["query"]; !ok {
+	// 	context.JSON(http.StatusInternalServerError, "Cannot get the query")
+	// }
 
-	if query, ok = vars["query"]; !ok {
-		fmt.Fprint(w, "Error!")
-	}
+	// var indexedBooks []IndexedBook
+	// h.db.Find(&indexedBooks)
 
-	var indexedBooks []IndexedBook
-	h.db.Find(&indexedBooks)
+	// bookIds := make([]uint, 1)
+	// neighborIds := make([]uint, 1)
 
-	bookIds := make([]uint, 1)
-	neighborIds := make([]uint, 1)
+	// for _, indexedBook := range indexedBooks {
+	// 	var worldOccurancesMap map[string]uint
+	// 	err := json.Unmarshal([]byte(indexedBook.WorldOccurancesJSON), &worldOccurancesMap)
 
-	for _, indexedBook := range indexedBooks {
-		var worldOccurancesMap map[string]uint
-		err := json.Unmarshal([]byte(indexedBook.WorldOccurancesJSON), &worldOccurancesMap)
+	// 	if err != nil {
+	// 		Error500Response(w)
+	// 		return
+	// 	}
 
-		if err != nil {
-			Error500Response(w)
-			return
-		}
+	// 	if count, ok := worldOccurancesMap[query]; !ok {
+	// 		// Update the occurance count of the books
+	// 		var book Book
+	// 		h.db.First(&book, indexedBook.ID)
+	// 		book.Occurance = count
+	// 		h.db.Save(&book)
 
-		if count, ok := worldOccurancesMap[query]; !ok {
-			// Update the occurance count of the books
-			var book Book
-			h.db.First(&book, indexedBook.ID)
-			book.Occurance = count
-			h.db.Save(&book)
+	// 		// Append this book to the book ids
+	// 		bookIds = append(bookIds, indexedBook.ID)
 
-			// Append this book to the book ids
-			bookIds = append(bookIds, indexedBook.ID)
+	// 		// Add neighbors
+	// 		var indexedBookRecord IndexedBook
+	// 		h.db.First(&indexedBookRecord, indexedBook.ID)
 
-			// Add neighbors
-			var indexedBookRecord IndexedBook
-			h.db.First(&indexedBookRecord, indexedBook.ID)
+	// 		var neighbors []uint
+	// 		err := json.Unmarshal([]byte(indexedBookRecord.WorldOccurancesJSON), &neighbors)
 
-			var neighbors []uint
-			err := json.Unmarshal([]byte(indexedBookRecord.WorldOccurancesJSON), &neighbors)
+	// 		if err != nil {
+	// 			Error500Response(w)
+	// 			return
+	// 		}
 
-			if err != nil {
-				Error500Response(w)
-				return
-			}
-
-			neighborIds = append(neighborIds, neighbors...) // Make this a set
-		}
-
-	}
+	// 		neighborIds = append(neighborIds, neighbors...) // Make this a set
+	// 	}
+	// }
+	context.JSON(http.StatusOK, []Book{})
 }
 
 // regex search
-func (h *handler) RegexSearchHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Regex Search")
+func (h *handler) RegexSearchHandler(context *gin.Context) {
+	context.JSON(http.StatusOK, []Book{})
 }

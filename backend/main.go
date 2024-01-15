@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/RootLeo00/book-web-app-daar/pkg/backend"
-	"github.com/gorilla/mux"
+	"github.com/gin-gonic/gin"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -48,8 +48,7 @@ func main() {
 		&backend.IndexedBook{},
 		&backend.JaccardNeighbors{})
 
-	// Create server mux
-	router := mux.NewRouter()
+	router := gin.Default()
 
 	// Register the handlers to the mux
 	err = backend.RegisterHandler(router, db)
@@ -58,8 +57,16 @@ func main() {
 		panic("Cannot create the handler")
 	}
 
+	server := &http.Server{
+		Addr:           ":8080",
+		Handler:        router,
+		ReadTimeout:    10 * time.Second,
+		WriteTimeout:   10 * time.Second,
+		MaxHeaderBytes: 1 << 20,
+	}
+
 	fmt.Println("Starting server at port 8080...")
-	if err := http.ListenAndServe(":8080", router); err != nil {
+	if err := server.ListenAndServe(); err != nil {
 		panic(err)
 	}
 }
