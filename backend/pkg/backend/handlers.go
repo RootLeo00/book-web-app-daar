@@ -1,6 +1,7 @@
 package backend
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -82,7 +83,47 @@ func (h *handler) SearchHandler(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprint(w, "Error!")
 	}
 
-	fmt.Fprintf(w, "Search q %q", query)
+	var indexedBooks []IndexedBook
+	h.db.Find(&indexedBooks)
+
+	bookIds := make([]uint, 1)
+	neighborIds := make([]uint, 1)
+
+	for _, indexedBook := range indexedBooks {
+		var worldOccurancesMap map[string]uint
+		err := json.Unmarshal([]byte(indexedBook.WorldOccurancesJSON), &worldOccurancesMap)
+
+		if err != nil {
+			Error500Response(w)
+			return
+		}
+
+		if count, ok := worldOccurancesMap[query]; !ok {
+			// Update the occurance count of the books
+			var book Book
+			h.db.First(&book, indexedBook.ID)
+			book.Occurance = count
+			h.db.Save(&book)
+
+			// Append this book to the book ids
+			bookIds = append(bookIds, indexedBook.ID)
+
+			// Add neighbors
+			var indexedBookRecord IndexedBook
+			h.db.First(&indexedBookRecord, indexedBook.ID)
+
+			var neighbors []uint
+			err := json.Unmarshal([]byte(indexedBookRecord.WorldOccurancesJSON), &neighbors)
+
+			if err != nil {
+				Error500Response(w)
+				return
+			}
+
+			neighborIds = append(neighborIds, neighbors...) // Make this a set
+		}
+
+	}
 }
 
 // regex search

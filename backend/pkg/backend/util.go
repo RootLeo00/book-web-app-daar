@@ -19,7 +19,7 @@ func Error404Response(w http.ResponseWriter) {
 	w.Header().Add("Content-Type", "application/json")
 	e := json.NewEncoder(w)
 	e.Encode(map[string]any{
-		"code":    200,
+		"code":    404,
 		"message": "Not Found",
 		"result":  map[string]string{},
 	})
@@ -29,8 +29,18 @@ func Error400Response(w http.ResponseWriter) {
 	w.Header().Add("Content-Type", "application/json")
 	e := json.NewEncoder(w)
 	e.Encode(map[string]any{
-		"code":    200,
+		"code":    400,
 		"message": "Bad Request",
+		"result":  map[string]string{},
+	})
+}
+
+func Error500Response(w http.ResponseWriter) {
+	w.Header().Add("Content-Type", "application/json")
+	e := json.NewEncoder(w)
+	e.Encode(map[string]any{
+		"code":    500,
+		"message": "Internal Server Error",
 		"result":  map[string]string{},
 	})
 }
