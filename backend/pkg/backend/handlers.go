@@ -1,6 +1,7 @@
 package backend
 
 import (
+	"encoding/json"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -28,87 +29,79 @@ func RegisterHandler(router *gin.Engine, db *gorm.DB) error {
 	return nil
 }
 
-// index /
-// Done
+// The index page
 func (h *handler) IndexHandler(context *gin.Context) {
-	context.JSON(http.StatusOK, "Server Online")
+	context.JSON(http.StatusOK, "Success")
 }
 
-// get books
-// Done
+// Gets all of the books in the database
 func (h *handler) GetBooksHandler(context *gin.Context) {
+	// Get all of the books
 	var books []Book
-
 	h.db.Find(&books)
 
+	// Response with the books list
 	context.JSON(http.StatusOK, books)
 }
 
-// get book with id
-// Done
+// Gets the book object by id
 func (h *handler) GetBooksIDHandler(context *gin.Context) {
-	// vars := mux.Vars(r)
-	// var id string
-	// var ok bool
+	// Get the parameter id
+	id := context.Param("id")
 
-	// if id, ok = vars["id"]; !ok {
-	// 	context.JSON(http.StatusInternalServerError, "Cannot get the id")
-	// 	return
-	// }
+	// Get the book with the id from database
+	var book *Book
+	h.db.First(book, id)
 
-	// var book *Book
-
-	// h.db.First(book, id)
-
-	context.JSON(http.StatusOK, []Book{})
+	// Response with the book object
+	context.JSON(http.StatusOK, book)
 }
 
 // search
 func (h *handler) SearchHandler(context *gin.Context) {
-	// if query, ok = vars["query"]; !ok {
-	// 	context.JSON(http.StatusInternalServerError, "Cannot get the query")
-	// }
+	// Get the parameter query
+	query := context.Param("query")
 
-	// var indexedBooks []IndexedBook
-	// h.db.Find(&indexedBooks)
+	var indexedBooks []IndexedBook
+	h.db.Find(&indexedBooks)
 
-	// bookIds := make([]uint, 1)
-	// neighborIds := make([]uint, 1)
+	bookIds := make([]uint, 1)
+	neighborIds := make([]uint, 1)
 
-	// for _, indexedBook := range indexedBooks {
-	// 	var worldOccurancesMap map[string]uint
-	// 	err := json.Unmarshal([]byte(indexedBook.WorldOccurancesJSON), &worldOccurancesMap)
+	for _, indexedBook := range indexedBooks {
+		var worldOccurancesMap map[string]uint
+		err := json.Unmarshal([]byte(indexedBook.WorldOccurancesJSON), &worldOccurancesMap)
 
-	// 	if err != nil {
-	// 		Error500Response(w)
-	// 		return
-	// 	}
+		if err != nil {
+			context.JSON(http.StatusInternalServerError, []Book{})
+			return
+		}
 
-	// 	if count, ok := worldOccurancesMap[query]; !ok {
-	// 		// Update the occurance count of the books
-	// 		var book Book
-	// 		h.db.First(&book, indexedBook.ID)
-	// 		book.Occurance = count
-	// 		h.db.Save(&book)
+		if count, ok := worldOccurancesMap[query]; !ok {
+			// Update the occurance count of the books
+			var book Book
+			h.db.First(&book, indexedBook.ID)
+			book.Occurance = count
+			h.db.Save(&book)
 
-	// 		// Append this book to the book ids
-	// 		bookIds = append(bookIds, indexedBook.ID)
+			// Append this book to the book ids
+			bookIds = append(bookIds, indexedBook.ID)
 
-	// 		// Add neighbors
-	// 		var indexedBookRecord IndexedBook
-	// 		h.db.First(&indexedBookRecord, indexedBook.ID)
+			// Add neighbors
+			var indexedBookRecord IndexedBook
+			h.db.First(&indexedBookRecord, indexedBook.ID)
 
-	// 		var neighbors []uint
-	// 		err := json.Unmarshal([]byte(indexedBookRecord.WorldOccurancesJSON), &neighbors)
+			var neighbors []uint
+			err := json.Unmarshal([]byte(indexedBookRecord.WorldOccurancesJSON), &neighbors)
 
-	// 		if err != nil {
-	// 			Error500Response(w)
-	// 			return
-	// 		}
+			if err != nil {
+				context.JSON(http.StatusInternalServerError, []Book{})
+				return
+			}
 
-	// 		neighborIds = append(neighborIds, neighbors...) // Make this a set
-	// 	}
-	// }
+			neighborIds = append(neighborIds, neighbors...) // Make this a set
+		}
+	}
 	context.JSON(http.StatusOK, []Book{})
 }
 
