@@ -1,7 +1,6 @@
 version: '3.8'
 
 services:
-
   frontend:
     build:
       context: ./frontend
@@ -12,13 +11,12 @@ services:
       - BACKEND_URL=backend
     depends_on:
       - backend
-
   backend:
     build:
       context: ./backend
       dockerfile: Dockerfile
     ports:
-      - "8080:8080"  # Expose the frontend on port 80
+      - "8080:8080"  # Expose the frontend on port 8080
     environment:
       - DATABASE_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@database:5432/${POSTGRES_DB}
     depends_on:
@@ -33,7 +31,6 @@ services:
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
     ports:
       - "5432:5432"
-      
   pgadmin:
     image: dpage/pgadmin4
     restart: always
