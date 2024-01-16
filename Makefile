@@ -5,5 +5,5 @@ start:
 build:
 	docker-compose -f docker-compose.dev.yaml build
 
-stop:
+remove:
 	docker-compose -f docker-compose.dev.yaml down
