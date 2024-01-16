@@ -130,8 +130,8 @@ func (h *handler) GetBooksIDHandler(context *gin.Context) {
 	id := context.Param("id")
 
 	// Get the book with the id from database
-	var book *Book
-	h.db.First(book, id)
+	var book Book
+	h.db.First(&book, id)
 
 	// Response with the book object
 	context.JSON(http.StatusOK, book)
