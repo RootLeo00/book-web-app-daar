@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"regexp"
 
 	"github.com/gin-gonic/gin"
 	"github.com/hashicorp/go-set/v2"
@@ -185,7 +186,6 @@ func (h *handler) SearchHandler(context *gin.Context) {
 				return
 			}
 
-			// TODO: Do not add the neighbors if they are included in the bookIds list. or make it a set?
 			neighborIds.InsertSlice(neighbors)
 		}
 	}
@@ -214,5 +214,85 @@ func (h *handler) SearchHandler(context *gin.Context) {
 
 // regex search
 func (h *handler) RegexSearchHandler(context *gin.Context) {
-	context.JSON(http.StatusOK, []Book{})
+	// Get the parameter query
+	regex := context.Param("regex")
+	fmt.Printf("ZOZZOZOZOOZOZOZOZOZOOZORT: %q", regex)
+
+	expression, err := regexp.Compile(regex)
+
+	if err != nil {
+		context.JSON(http.StatusBadRequest, fmt.Sprintf("cannot compile regex %q", regex))
+		return
+	}
+
+	// Get all of the indexed books
+	var indexedBooks []IndexedBook
+	h.db.Find(&indexedBooks)
+
+	// Define the actual books
+	returnBooks := set.New[Book](0)
+	bookIds := set.New[uint](len(indexedBooks))
+	neighborIds := set.New[uint](0)
+
+	// For each book calculate
+	for _, indexedBook := range indexedBooks {
+		// Get the World occurance json
+		var worldOccurancesMap map[string]uint
+		err := json.Unmarshal([]byte(indexedBook.WorldOccurancesJSON), &worldOccurancesMap)
+
+		if err != nil {
+			context.JSON(http.StatusInternalServerError, fmt.Sprint(err))
+			return
+		}
+
+		// Update the occurance count of the books, bad performance!
+		var book Book
+		h.db.First(&book, indexedBook.ID)
+		count := uint(len(expression.FindAllStringIndex(book.Text, -1)))
+
+		if count != 0 {
+			book.Occurance = count
+			h.db.Save(&book)
+
+			// Append this book to the book ids
+			bookIds.Insert(indexedBook.ID)
+			returnBooks.Insert(book)
+
+			// Add neighbors
+			var jaccardNeighbors JaccardNeighbors
+			h.db.First(&jaccardNeighbors, indexedBook.ID)
+
+			var neighbors []uint
+			err = json.Unmarshal([]byte(jaccardNeighbors.NeighborsJSON), &neighbors)
+
+			if err != nil {
+				context.JSON(http.StatusInternalServerError, fmt.Sprint(err))
+				return
+			}
+
+			neighborIds.InsertSlice(neighbors)
+		}
+
+	}
+
+	// Get only the negigbor ones
+	onlyNeigbors := neighborIds.Difference(bookIds)
+
+	// Get the occurance names
+	var occuranceBooks []Book
+	h.db.Where("id in ?", onlyNeigbors.Slice()).Find(&occuranceBooks)
+
+	// Set all the occurances to zero
+	for _, element := range occuranceBooks {
+		element.Occurance = 0
+	}
+
+	// Update the occurances according to zero
+	h.db.Updates(occuranceBooks)
+
+	// Now get the neigboring books
+	context.JSON(http.StatusOK, map[string]any{
+		"books":     returnBooks,
+		"neighbors": occuranceBooks,
+	})
 }
