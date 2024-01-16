@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/hashicorp/go-set/v2"
 	"gorm.io/gorm"
 )
 
@@ -30,7 +31,7 @@ func RegisterHandler(router *gin.Engine, db *gorm.DB) error {
 	router.GET("/reset", func(context *gin.Context) {
 		books := []Book{
 			{
-				Model:     gorm.Model{ID: 1},
+				Model:     Model{ID: 1},
 				Title:     "Peter Pan",
 				Author:    "Barrie, J. M. (James Matthew)",
 				Language:  "en",
@@ -40,8 +41,8 @@ func RegisterHandler(router *gin.Engine, db *gorm.DB) error {
 				Occurance: 0,
 			},
 			{
-				Model:     gorm.Model{ID: 2},
-				Title:     "The Book of Mormon: An Account Written by the Hand of Mormon, Upon Plates Taken from the Plates of Nephi",
+				Model:     Model{ID: 2},
+				Title:     "The Book of Mormon",
 				Author:    "Church of Jesus Christ of Latter-day Saints",
 				Language:  "en",
 				Text:      "The Book of Mormon: An Account Written by the Hand of Mormon, Upon Plates Taken from the Plates of NephiChurch of Jesus Christ of Latter-day Saints -- Sacred books Mormon Church -- Sacred books",
@@ -50,7 +51,7 @@ func RegisterHandler(router *gin.Engine, db *gorm.DB) error {
 				Occurance: 0,
 			},
 			{
-				Model:     gorm.Model{ID: 3},
+				Model:     Model{ID: 3},
 				Title:     "The Federalist Papers",
 				Author:    "Hamilton, Alexander",
 				Language:  "en",
@@ -63,33 +64,33 @@ func RegisterHandler(router *gin.Engine, db *gorm.DB) error {
 
 		indexedBooks := []IndexedBook{
 			{
-				Model:               gorm.Model{ID: 1},
+				Model:               Model{ID: 1},
 				Title:               "Peter Pan",
-				WorldOccurancesJSON: "{\"peter\": 2, \"panfairies\": 1, \"fiction\": 4, \"fantasy\": 1, \"literature\": 1, \"never\": 2, \"land\": 1, \"imaginary\": 1, \"place\": 1, \"pan\": 1, \"fictitious\": 1, \"character\": 1, \"pirates\": 1}",
+				WorldOccurancesJSON: "{\"test\": 1}",
 			},
 			{
-				Model:               gorm.Model{ID: 2},
-				Title:               "The Book of Mormon: An Account Written by the Hand of Mormon, Upon Plates Taken from the Plates of Nephi",
-				WorldOccurancesJSON: "{\"book\": 1, \"mormon\": 3, \"account\": 1, \"written\": 1, \"hand\": 1, \"upon\": 1, \"plates\": 2, \"taken\": 1, \"nephichurch\": 1, \"jesus\": 1, \"christ\": 1, \"latter\": 1, \"day\": 1, \"saints\": 1, \"sacred\": 2, \"books\": 2, \"church\": 1}",
+				Model:               Model{ID: 2},
+				Title:               "The Book of Mormon",
+				WorldOccurancesJSON: "{\"test\": 2}",
 			},
 			{
-				Model:               gorm.Model{ID: 3},
+				Model:               Model{ID: 3},
 				Title:               "The Federalist Papers",
-				WorldOccurancesJSON: "{\"federalist\": 1, \"papersconstitutional\": 1, \"history\": 1, \"united\": 2, \"states\": 2, \"sources\": 1, \"constitutional\": 1, \"law\": 1}",
+				WorldOccurancesJSON: "{\"papers\": 1}",
 			},
 		}
 
 		jaccardNeighbors := []JaccardNeighbors{
 			{
-				Model:         gorm.Model{ID: 1},
+				Model:         Model{ID: 1},
 				NeighborsJSON: "[2]",
 			},
 			{
-				Model:         gorm.Model{ID: 2},
-				NeighborsJSON: "[1, 3]",
+				Model:         Model{ID: 2},
+				NeighborsJSON: "[1]",
 			},
 			{
-				Model:         gorm.Model{ID: 3},
+				Model:         Model{ID: 3},
 				NeighborsJSON: "[]",
 			},
 		}
@@ -141,11 +142,14 @@ func (h *handler) SearchHandler(context *gin.Context) {
 	// Get the parameter query
 	query := context.Param("query")
 
+	// Get all of the indexed books
 	var indexedBooks []IndexedBook
 	h.db.Find(&indexedBooks)
 
-	bookIds := make([]uint, 1)
-	neighborIds := make([]uint, 1)
+	// Define the actual books
+	returnBooks := set.New[Book](0)
+	bookIds := set.New[uint](len(indexedBooks))
+	neighborIds := set.New[uint](0)
 
 	// For each book calculate
 	for _, indexedBook := range indexedBooks {
@@ -158,7 +162,7 @@ func (h *handler) SearchHandler(context *gin.Context) {
 			return
 		}
 
-		if count, ok := worldOccurancesMap[query]; !ok {
+		if count, ok := worldOccurancesMap[query]; ok {
 			// Update the occurance count of the books, bad performance!
 			var book Book
 			h.db.First(&book, indexedBook.ID)
@@ -166,7 +170,8 @@ func (h *handler) SearchHandler(context *gin.Context) {
 			h.db.Save(&book)
 
 			// Append this book to the book ids
-			bookIds = append(bookIds, indexedBook.ID)
+			bookIds.Insert(indexedBook.ID)
+			returnBooks.Insert(book)
 
 			// Add neighbors
 			var jaccardNeighbors JaccardNeighbors
@@ -180,14 +185,30 @@ func (h *handler) SearchHandler(context *gin.Context) {
 				return
 			}
 
-			neighborIds = append(neighborIds, neighbors...) // Make this a set
+			// TODO: Do not add the neighbors if they are included in the bookIds list. or make it a set?
+			neighborIds.InsertSlice(neighbors)
 		}
 	}
 
+	// Get only the negigbor ones
+	onlyNeigbors := neighborIds.Difference(bookIds)
+
+	// Get the occurance names
+	var occuranceBooks []Book
+	h.db.Where("id in ?", onlyNeigbors.Slice()).Find(&occuranceBooks)
+
+	// Set all the occurances to zero
+	for _, element := range occuranceBooks {
+		element.Occurance = 0
+	}
+
+	// Update the occurances according to zero
+	h.db.Updates(occuranceBooks)
+
 	// Now get the neigboring books
 	context.JSON(http.StatusOK, map[string]any{
-		"books":     bookIds,
-		"neighbors": neighborIds,
+		"books":     returnBooks,
+		"neighbors": occuranceBooks,
 	})
 }
 
