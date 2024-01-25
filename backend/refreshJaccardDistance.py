@@ -8,7 +8,6 @@ from utils import distance_jaccard
 
 DB_FILE_PATH = "./db.sqlite3"
 TRESHOLD = 0.65
-NUMBER_OF_BOOKS = 1664
 
 ## connect to the SQLite database
 def connect_to_database(DB_FILE_PATH):
