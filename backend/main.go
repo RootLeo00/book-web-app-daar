@@ -15,6 +15,23 @@ import (
 
 const MAX_TRIES = 3
 
+func CORSMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
+		c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
+		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, origin, Cache-Control, X-Requested-With")
+		c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS, GET, PUT, DELETE")
+		// c.Writer.Header().Set("Origin", "https://localhost:8080")
+
+		if c.Request.Method == "OPTIONS" {
+			c.AbortWithStatus(http.StatusNoContent)
+			return
+		}
+
+		c.Next()
+	}
+}
+
 func main() {
 	var dsn string
 	var db *gorm.DB
@@ -60,6 +77,13 @@ func main() {
 
 	router := gin.Default()
 
+	// Add middewares
+	router.Use(CORSMiddleware())
+	// router.Use(cors.New(cors.Config{
+	// 	AllowAllOrigins: true,
+	// 	AllowHeaders:    []string{"Origin"},
+	// }))
+
 	// Register the handlers to the mux
 	err = backend.RegisterHandler(router, db)
 
@@ -72,7 +96,7 @@ func main() {
 		Handler:        router,
 		ReadTimeout:    10 * time.Second,
 		WriteTimeout:   10 * time.Second,
-		MaxHeaderBytes: 1 << 20,
+		MaxHeaderBytes: 1 << 32,
 	}
 
 	logger.Default.Info(nil, "Starting server at port 8080...")

@@ -29,7 +29,7 @@ const HomePage = () => {
                     .then(async (res) => {
                         const obj = await JSON.parse(JSON.stringify(res))
                         setData(obj.books);
-                        setSuggestions(obj.neightboors);
+                        setSuggestions(obj.neighbors);
                         setMaxNumberOfBooks(obj.books.length);
                     })
             }
@@ -37,9 +37,12 @@ const HomePage = () => {
                 console.log("searching for name: ", word)
                 bookService.searchBook(word)
                     .then(async (res) => {
+                        console.log(res)
+                        
                         const obj = await JSON.parse(JSON.stringify(res))
+
                         setData(obj.books);
-                        setSuggestions(obj.neightboors);
+                        setSuggestions(obj.neighbors);
                         setMaxNumberOfBooks(obj.books.length);
                     })
             }

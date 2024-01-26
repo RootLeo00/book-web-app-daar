@@ -2,7 +2,8 @@ class BookService {
   urlApi;
 
   constructor() {
-    this.urlApi = process.env["BACKEND_URL"] || "backend"; //"http://127.0.0.1:8000"
+    // this.urlApi = process.env["BACKEND_URL"] || "backend"; //"http://127.0.0.1:8080"
+        this.urlApi = "http://localhost:8080" || "backend"; //"http://127.0.0.1:8080"
   }
 
   searchBook(word:string) {
