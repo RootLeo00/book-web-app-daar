@@ -20,7 +20,7 @@ const BookCard = ({ cardData }: any) => {
             <CardMedia
                 component="img"
                 height="500"
-                image={cardData?.imageUrl}
+                image={cardData?.imageBook}
                 alt="Loading card..."
             />
             <CardContent>
