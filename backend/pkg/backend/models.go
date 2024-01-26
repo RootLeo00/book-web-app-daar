@@ -15,6 +15,7 @@ type Model struct {
 
 type Book struct {
 	Model
+	BookID    uint    `json:"id"`
 	Title     string  `json:"title"`
 	Author    string  `json:"author"`
 	Language  string  `json:"language"`
@@ -26,11 +27,13 @@ type Book struct {
 
 type IndexedBook struct {
 	Model
+	BookID              uint   `json:"id"`
 	Title               string `json:"title"`
 	WorldOccurancesJSON string `gorm:"type:text" json:"wordOcc"`
 }
 
 type JaccardNeighbors struct {
 	Model
+	BookID        uint   `json:"id"`
 	NeighborsJSON string `gorm:"type:text" json:"neightbors"`
 }
