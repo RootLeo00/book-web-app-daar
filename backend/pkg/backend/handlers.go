@@ -139,8 +139,6 @@ func (h *handler) RegexSearchHandler(context *gin.Context) {
 	// Get the parameter query
 	regex := context.Param("regex")
 
-	fmt.Printf("Given regex %q\n", regex)
-
 	expression, err := regexp.Compile(regex)
 
 	if err != nil {
