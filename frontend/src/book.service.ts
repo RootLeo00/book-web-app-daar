@@ -2,12 +2,13 @@ class BookService {
   urlApi;
 
   constructor() {
-    // this.urlApi = process.env["BACKEND_URL"] || "backend"; //"http://127.0.0.1:8080"
-        this.urlApi = "http://localhost:8080" || "backend"; //"http://127.0.0.1:8080"
+    this.urlApi = process.env["BACKEND_URL"] || "backend"; //"http://127.0.0.1:8080"
   }
 
   searchBook(word:string) {
-    return fetch(`${this.urlApi}/Search/${word}/`)
+    return fetch(`${this.urlApi}/Search/${word}`, {
+      mode: "cors",
+    })
       .then(response => response.json())
       .catch(error => {
         console.error('Error fetching data:', error);
@@ -16,7 +17,9 @@ class BookService {
   }
 
   searchBookRegex(regex:string) {
-    return fetch(`${this.urlApi}/RegexSearch/${regex}/`)
+    return fetch(`${this.urlApi}/RegexSearch/${regex}`, {
+      mode: "cors",
+    })
       .then(response => response.json())
       .catch(error => {
         console.error('Error fetching data:', error);

@@ -18,7 +18,7 @@ const MAX_TRIES = 3
 func CORSMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
-		c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
+		// c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
 		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, origin, Cache-Control, X-Requested-With")
 		c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS, GET, PUT, DELETE")
 		// c.Writer.Header().Set("Origin", "https://localhost:8080")
@@ -79,10 +79,9 @@ func main() {
 
 	// Add middewares
 	router.Use(CORSMiddleware())
-	// router.Use(cors.New(cors.Config{
-	// 	AllowAllOrigins: true,
-	// 	AllowHeaders:    []string{"Origin"},
-	// }))
+	// config := cors.DefaultConfig()
+	// config.AllowOrigins = []string{"http://localhost:3000"}
+	// router.Use(cors.New(config))
 
 	// Register the handlers to the mux
 	err = backend.RegisterHandler(router, db)
