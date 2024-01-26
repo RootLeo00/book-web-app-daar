@@ -9,6 +9,7 @@ import json
 DB_FILE_PATH = "./db.sqlite3"
 GUTENDEX_URL = "https://gutendex.com/books"
 MIME_TYPE = "text"
+MAX_PAGES = 10
 
 ## connect to the SQLite database
 def connect_to_database(DB_FILE_PATH):
@@ -29,7 +30,7 @@ def construct_url(api_endpoint, mime_type, page):
 ## fetch all book data from a page
 def fetch_and_store_data(conn):
     page = 1
-    while page < 10:
+    while page < MAX_PAGES:
         books_url = construct_url(GUTENDEX_URL, MIME_TYPE, page)
         response = requests.get(books_url)
         print(f"Fetching books from: {books_url} ...")
@@ -71,7 +72,7 @@ def process_and_store_books(books, conn):
         }
 
         ## save the book instance to database
-        insert_book_query = """INSERT INTO books (created_at, updated_at, book_id, title, author, language, text, image_url, c_rank, occurance)
+        insert_book_query = """INSERT INTO books (created_at, updated_at, book_id, title, author, language, text, image_url, c_rank, occurrence)
                           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"""
         cursor.execute(insert_book_query, (book_instance['created_at'], book_instance['updated_at'], book_instance['book_id'],
                                         book_instance['title'], book_instance['author'], book_instance['language'], 
@@ -90,7 +91,7 @@ def process_and_store_books(books, conn):
         }
 
         ## save the book instance to database
-        insert_indexed_book_query = """INSERT INTO indexed_books (created_at, updated_at, title, world_occurances_json, book_id)
+        insert_indexed_book_query = """INSERT INTO indexed_books (created_at, updated_at, title, word_occurrence_json, book_id)
                           VALUES (?, ?, ?, ?, ?)"""
         cursor.execute(insert_indexed_book_query, (indexed_book_instance['created_at'], indexed_book_instance['updated_at'],
                                                    indexed_book_instance['title'], indexed_book_instance['word_occurrence'],
