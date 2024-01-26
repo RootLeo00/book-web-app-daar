@@ -9,7 +9,7 @@ import json
 DB_FILE_PATH = "./db.sqlite3"
 GUTENDEX_URL = "https://gutendex.com/books"
 MIME_TYPE = "text"
-MAX_PAGES = 10
+MAX_PAGES = 60
 
 ## connect to the SQLite database
 def connect_to_database(DB_FILE_PATH):
