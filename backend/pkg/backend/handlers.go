@@ -29,84 +29,6 @@ func RegisterHandler(router *gin.Engine, db *gorm.DB) error {
 	router.GET("/Search/:query", h.SearchHandler)
 	router.GET("/RegexSearch/:regex", h.RegexSearchHandler)
 
-	// router.GET("/reset", func(context *gin.Context) {
-	// 	books := []Book{
-	// 		{
-	// 			Model:     Model{ID: 1},
-	// 			Title:     "Peter Pan",
-	// 			Author:    "Barrie, J. M. (James Matthew)",
-	// 			Language:  "en",
-	// 			Text:      "Peter PanFairies -- Fiction Fantasy literature Never-Never Land (Imaginary place) -- Fiction Peter Pan (Fictitious character) -- Fiction Pirates -- Fiction",
-	// 			ImageURL:  "https://www.gutenberg.org/cache/epub/16/pg16.cover.medium.jpg",
-	// 			CRank:     0,
-	// 			Occurrence: 0,
-	// 		},
-	// 		{
-	// 			Model:     Model{ID: 2},
-	// 			Title:     "The Book of Mormon",
-	// 			Author:    "Church of Jesus Christ of Latter-day Saints",
-	// 			Language:  "en",
-	// 			Text:      "The Book of Mormon: An Account Written by the Hand of Mormon, Upon Plates Taken from the Plates of NephiChurch of Jesus Christ of Latter-day Saints -- Sacred books Mormon Church -- Sacred books",
-	// 			ImageURL:  "https://www.gutenberg.org/cache/epub/17/pg17.cover.medium.jpg",
-	// 			CRank:     0,
-	// 			Occurrence: 0,
-	// 		},
-	// 		{
-	// 			Model:     Model{ID: 3},
-	// 			Title:     "The Federalist Papers",
-	// 			Author:    "Hamilton, Alexander",
-	// 			Language:  "en",
-	// 			Text:      "The Federalist PapersConstitutional history -- United States -- Sources Constitutional law -- United States",
-	// 			ImageURL:  "https://www.gutenberg.org/cache/epub/18/pg18.cover.medium.jpg",
-	// 			CRank:     0,
-	// 			Occurance: 0,
-	// 		},
-	// 	}
-
-	// 	indexedBooks := []IndexedBook{
-	// 		{
-	// 			Model:               Model{ID: 1},
-	// 			Title:               "Peter Pan",
-	// 			WorldOccurancesJSON: "{\"test\": 1}",
-	// 		},
-	// 		{
-	// 			Model:               Model{ID: 2},
-	// 			Title:               "The Book of Mormon",
-	// 			WorldOccurancesJSON: "{\"test\": 2}",
-	// 		},
-	// 		{
-	// 			Model:               Model{ID: 3},
-	// 			Title:               "The Federalist Papers",
-	// 			WorldOccurancesJSON: "{\"papers\": 1}",
-	// 		},
-	// 	}
-
-	// 	jaccardNeighbors := []JaccardNeighbors{
-	// 		{
-	// 			Model:         Model{ID: 1},
-	// 			NeighborsJSON: "[2]",
-	// 		},
-	// 		{
-	// 			Model:         Model{ID: 2},
-	// 			NeighborsJSON: "[1]",
-	// 		},
-	// 		{
-	// 			Model:         Model{ID: 3},
-	// 			NeighborsJSON: "[]",
-	// 		},
-	// 	}
-
-	// 	db.Exec("DELETE FROM books")
-	// 	db.Exec("DELETE FROM indexed_books")
-	// 	db.Exec("DELETE FROM jaccard_neighbors")
-
-	// 	h.db.Create(books)
-	// 	h.db.Create(indexedBooks)
-	// 	h.db.Create(jaccardNeighbors)
-
-	// 	context.JSON(http.StatusOK, "Success")
-	// })
-
 	return nil
 }
 
@@ -155,15 +77,15 @@ func (h *handler) SearchHandler(context *gin.Context) {
 	// For each book calculate
 	for _, indexedBook := range indexedBooks {
 		// Get the World occurance json
-		var worldOccurancesMap map[string]uint
-		err := json.Unmarshal([]byte(indexedBook.WordOccurrenceJSON), &worldOccurancesMap)
+		var wordOccurrencesMap map[string]uint
+		err := json.Unmarshal([]byte(indexedBook.WordOccurrenceJSON), &wordOccurrencesMap)
 
 		if err != nil {
 			context.JSON(http.StatusInternalServerError, fmt.Sprint(err))
 			return
 		}
 
-		if count, ok := worldOccurancesMap[query]; ok {
+		if count, ok := wordOccurrencesMap[query]; ok {
 			// Update the occurance count of the books, bad performance!
 			var book Book
 			h.db.First(&book, indexedBook.ID)
@@ -217,6 +139,8 @@ func (h *handler) RegexSearchHandler(context *gin.Context) {
 	// Get the parameter query
 	regex := context.Param("regex")
 
+	fmt.Printf("Given regex %q\n", regex)
+
 	expression, err := regexp.Compile(regex)
 
 	if err != nil {
@@ -236,8 +160,8 @@ func (h *handler) RegexSearchHandler(context *gin.Context) {
 	// For each book calculate
 	for _, indexedBook := range indexedBooks {
 		// Get the World occurance json
-		var worldOccurancesMap map[string]uint
-		err := json.Unmarshal([]byte(indexedBook.WordOccurrenceJSON), &worldOccurancesMap)
+		var wordOccurrencesMap map[string]uint
+		err := json.Unmarshal([]byte(indexedBook.WordOccurrenceJSON), &wordOccurrencesMap)
 
 		if err != nil {
 			context.JSON(http.StatusInternalServerError, fmt.Sprint(err))
