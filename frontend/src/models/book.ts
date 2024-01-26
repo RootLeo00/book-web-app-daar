@@ -6,5 +6,5 @@ export interface IBook {
   imageBook: string;
   text: string;
   crank: number;
-  occurence: number;
+  occurrence: number;
 }

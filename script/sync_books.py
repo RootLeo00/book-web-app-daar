@@ -4,6 +4,7 @@ import requests
 import logging
 from datetime import datetime
 from utils import getWordsWithOcc
+import json 
 
 DB_FILE_PATH = "./db.sqlite3"
 GUTENDEX_URL = "https://gutendex.com/books"
@@ -85,7 +86,7 @@ def process_and_store_books(books, conn):
             'created_at': current_time,
             'updated_at': current_time,
             'title': book['title'],
-            'word_occurrence': str(dict(word_occurence))
+            'word_occurrence': json.dumps(dict(word_occurence))
         }
 
         ## save the book instance to database

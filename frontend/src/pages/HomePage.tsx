@@ -56,7 +56,7 @@ const HomePage = () => {
             if (sort === "pertinence") {
                 return b.crank - a.crank;
             } else if (sort === "occurrence") {
-                return b.occurence - a.occurence;
+                return b.occurrence - a.occurrence;
             }
             return 0; // No sorting 
         });
@@ -67,7 +67,7 @@ const HomePage = () => {
             if (sort === "pertinence") {
                 return b.crank - a.crank;
             } else if (sort === "occurrence") {
-                return b.occurence - a.occurence;
+                return b.occurrence - a.occurrence;
             }
             return 0; // No sorting 
         })) : ([]);

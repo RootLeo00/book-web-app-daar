@@ -18,7 +18,7 @@ def getListIndexBook(wordsOcc, idBook):
     for word, occ in wordsOcc.items():
         list.append({
             "word": word,
-            "occurence": occ,
+            "occurrence": occ,
             "idBook": idBook,
         })
     return list

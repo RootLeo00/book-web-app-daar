@@ -5,6 +5,7 @@ import logging
 import ast
 from datetime import datetime
 from utils import distance_jaccard
+import json 
 
 DB_FILE_PATH = "./db.sqlite3"
 TRESHOLD = 0.65
@@ -40,8 +41,8 @@ def compute_jaccard_distance(conn):
         for book2 in all_books:
             _, _, _, _, book2_id, _, book2_word_occurence = book2
             if book1_id != book2_id:
-                d1 = ast.literal_eval(book1_word_occurence)
-                d2 = ast.literal_eval(book2_word_occurence)
+                d1 = json.loads(book1_word_occurence)
+                d2 = json.loads(book2_word_occurence)
                 result_distance = distance_jaccard(d1, d2)
                 
                 if result_distance < TRESHOLD:
@@ -55,7 +56,7 @@ def compute_jaccard_distance(conn):
             'book_id': book1_id,
             'created_at': current_time,
             'updated_at': current_time,
-            "neighbors": str(books_neighbor)
+            "neighbors": json.dumps(books_neighbor)
         }
 
         ## save jaccard neighbors to database
