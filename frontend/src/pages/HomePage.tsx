@@ -1,149 +1,165 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { IBook } from '../models/book';
 import BookService from '../book.service';
 import Button from '@mui/material/Button';
-import Checkbox from '@mui/material/Checkbox';
 import TextField from '@mui/material/TextField';
-import Select from '@mui/material/Select';
-import MenuItem from '@mui/material/MenuItem';
-import FormControl from '@mui/material/FormControl';
-import InputLabel from '@mui/material/InputLabel';
 import '../styles/styles.css';
+import Slider from '@mui/material/Slider';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import Stack from '@mui/material/Stack';
+import BookCard from '../components/BookCard';
+import { FormControl, Radio, RadioGroup } from '@mui/material';
 
 const HomePage = () => {
     const [data, setData] = useState<IBook[]>([]);
-    const [dataS, setDataS] = useState<IBook[]>([]);
+    const [inputNameBook, setInputNameBook] = useState<string>("");
+    const [inputRegex, setInputRegex] = useState<string>("");
     const [suggestions, setSuggestions] = useState<IBook[]>([]);
-    const [visi, setVisi] = useState(-1);
+    const [numberOfBooks, setNumberOfBooks] = useState<number>(5);
+    const [sort, setSort] = useState<string>("none");
+    const [maxNumberOfBooks, setMaxNumberOfBooks] = useState<number>(20);
 
     const bookService = new BookService();
 
-    const getbooks = async (word: string) => {
+    const getbooks = async (word: string, regex: boolean) => {
         try {
-            setData([]);
-            setSuggestions([]);
+            if (regex) {
+                console.log("searching for regex: ", word)
+                bookService.searchBookRegex(word)
+                    .then(async (res) => {
+                        const obj = await JSON.parse(JSON.stringify(res))
+                        setData(obj.books);
+                        setSuggestions(obj.neightboors);
+                        setMaxNumberOfBooks(obj.books.length);
+                    })
+            }
+            else {
+                console.log("searching for name: ", word)
+                bookService.searchBook(word)
+                    .then(async (res) => {
+                        const obj = await JSON.parse(JSON.stringify(res))
+                        setData(obj.books);
+                        setSuggestions(obj.neightboors);
+                        setMaxNumberOfBooks(obj.books.length);
+                    })
+            }
 
-            const res = await bookService.searchBook(word);
-            const obj = JSON.parse(JSON.stringify(res));
-            setData(obj.books);
-            setDataS(obj.books);
-            setSuggestions(obj.neightboors);
-            console.log(suggestions);
         } catch (err) {
             alert('failed loading json data');
             console.log(err);
         }
-    };
-
-    const handleClick = () => {
-        const isChecked = (document.getElementById("toggle_checkbox") as HTMLInputElement).checked;
-        console.log(isChecked);
-
-        setData([]);
-        setSuggestions([]);
-
-        if (isChecked) {
-            setVisi(1);
-        } else {
-            setVisi(-1);
-        }
-    };
-
-    const getbooksR = async (regex: string) => {
-        try {
-            const res = await bookService.searchBookRegex(regex);
-            const obj = JSON.parse(JSON.stringify(res));
-            setData(obj.books);
-            setDataS(obj.books);
-            setSuggestions(obj.neightboors);
-            console.log(suggestions);
-        } catch (err) {
-            alert('failed loading json data');
-            console.log(err);
-        }
-    };
-
-    const numberOfBooksRes = () => {
-        const e = (document.getElementById("numberbook_res") as HTMLInputElement).value;
-
-        if (e !== "max") {
-            setData(dataS.slice(0, parseInt(e, 10)));
-        } else {
-            setData(dataS);
-        }
-
-        (document.getElementById("numberbook_res") as HTMLInputElement).value = "def";
-    };
-
-    const sortbyOccurrenceRes = () => {
-        const e = (document.getElementById("occ_res") as HTMLInputElement).value;
-
-        if (e === "ON") {
-            setData([...data].sort((book1, book2) => book2.occurrence - book1.occurrence));
-        } else {
-            setData(dataS);
-        }
-
-        (document.getElementById("occ_res") as HTMLInputElement).value = "def";
-    };
-
-    const sortbyPertinenceRes = () => {
-        const e = (document.getElementById("pert_res") as HTMLInputElement).value;
-
-        if (e === "ON") {
-            setData([...data].sort((book1, book2) => book2.crank - book1.crank));
-        } else {
-            setData(dataS);
-        }
-
-        (document.getElementById("pert_res") as HTMLInputElement).value = "def";
     };
 
     useEffect(() => {
-        // componentDidMount logic here
-    }, []);
+        // Sorting the data based on occurrence or pertinence when the corresponding switch is true
+        const updatedSortedData = [...data].sort((a, b) => {
+            if (sort === "pertinence") {
+                return b.crank - a.crank;
+            } else if (sort === "occurrence") {
+                return b.occurence - a.occurence;
+            }
+            return 0; // No sorting 
+        });
+
+        setData(updatedSortedData);
+
+        const updatedSortedSuggestions = (suggestions !== undefined) ? ([...suggestions].sort((a, b) => {
+            if (sort === "pertinence") {
+                return b.crank - a.crank;
+            } else if (sort === "occurrence") {
+                return b.occurence - a.occurence;
+            }
+            return 0; // No sorting 
+        })) : ([]);
+
+        setSuggestions(updatedSortedSuggestions);
+
+    }, [suggestions, data, sort]);
+
 
     return (
         <div className="search-section">
-            <Button onClick={() => getbooks("yourSearchWord")}>Search Books</Button>
-
-            <FormControl>
-                <InputLabel htmlFor="toggle_checkbox">Suggestions</InputLabel>
-                <Checkbox
-                    id="toggle_checkbox"
-                    onChange={handleClick}
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+                <TextField
+                    type="text"
+                    id="namebook_res"
+                    label="Name of the Book to Search"
+                    color='warning'
+                    value={inputNameBook}
+                    onChange={(e) => { setInputNameBook(e.target.value) }}
                 />
-            </FormControl>
+                <Button onClick={() => getbooks(inputNameBook, false)}>Search Book Name</Button>
+            </div>
 
-            <Button onClick={() => getbooksR("yourRegex")}>Search Books with Regex</Button>
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+                <TextField
+                    type="text"
+                    id="regex_res"
+                    label="String to Search in all of the Books"
+                    color='warning'
+                    value={inputRegex}
+                    onChange={(e) => { setInputRegex(e.target.value) }}
+                />
+                <Button onClick={() => getbooks(inputRegex, true)}>Search String</Button>
+            </div>
+            <br />
+            <br />
 
-            <TextField
-                type="text"
-                id="numberbook_res"
-                label="Number of Books"
-            />
-            <Button onClick={numberOfBooksRes}>Apply Number of Books</Button>
-
-            <FormControl>
-                <InputLabel htmlFor="occ_res">Sort by Occurrence</InputLabel>
-                <Select id="occ_res" defaultValue="OFF">
-                    <MenuItem value="OFF">Off</MenuItem>
-                    <MenuItem value="ON">On</MenuItem>
-                </Select>
-            </FormControl>
-            <Button onClick={sortbyOccurrenceRes}>Apply Sort by Occurrence</Button>
-
-            <FormControl>
-                <InputLabel htmlFor="pert_res">Sort by Pertinence</InputLabel>
-                <Select id="pert_res" defaultValue="OFF">
-                    <MenuItem value="OFF">Off</MenuItem>
-                    <MenuItem value="ON">On</MenuItem>
-                </Select>
-            </FormControl>
-            <Button onClick={sortbyPertinenceRes}>Apply Sort by Pertinence</Button>
-
-            {/* Your JSX goes here */}
-        </div>
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+                <FormControlLabel
+                    control={
+                        <Slider
+                            value={numberOfBooks}
+                            onChange={(e, value) => { setNumberOfBooks(value as number) }} // TODO: make it more elegant
+                            min={0}
+                            max={maxNumberOfBooks}
+                            valueLabelDisplay="auto"
+                            aria-labelledby="numberOfBooks-slider"
+                            color="warning"
+                        />
+                    }
+                    label="Number of books to display"
+                />
+                <FormControl>
+                    <RadioGroup
+                        aria-label="sortingOption"
+                        name="sortingOption"
+                        value={sort}
+                        onChange={(event,value) => { setSort(value) }}
+                        row
+                    >
+                        <FormControlLabel
+                            value="occurrence"
+                            control={<Radio color="warning" />}
+                            label="Sort by Occurrence"
+                        />
+                        <FormControlLabel
+                            value="pertinence"
+                            control={<Radio color="warning" />}
+                            label="Sort by Pertinence"
+                        />
+                    </RadioGroup>
+                </FormControl>
+            </div>
+            <br />
+            <br />
+            <div>
+                <h2>Books</h2>
+                <Stack spacing={{ xs: 1, sm: 2 }} direction="row" useFlexGap flexWrap="wrap">
+                    {data.slice(0, numberOfBooks).map((book, index) => (
+                        <BookCard key={index} cardData={book} />
+                    ))}
+                </Stack>
+            </div>
+            <div>
+                <h2>Suggested Books</h2>
+                <Stack spacing={{ xs: 1, sm: 2 }} direction="row" useFlexGap flexWrap="wrap">
+                    {suggestions?.slice(0, numberOfBooks).map((book, index) => (
+                        <BookCard key={index} cardData={book} />
+                    ))}
+                </Stack>
+            </div>
+        </div >
     );
 };
 
