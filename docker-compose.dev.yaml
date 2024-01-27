@@ -43,14 +43,13 @@ services:
       - pgadmin_data:/var/lib/pgadmin
     depends_on:
       - database
-  python-scripts:
+  scripts:
     build:
-      context: ./python_scripts
+      context: ./script
       dockerfile: Dockerfile
+    restart: never
     environment:
-      - POSTGRES_DB=${POSTGRES_DB}
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - DATABASE_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@database:5432/${POSTGRES_DB}
     depends_on:
       - database
 volumes:

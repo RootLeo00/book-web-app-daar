@@ -12,17 +12,13 @@ GUTENDEX_URL = "https://gutendex.com/books"
 MIME_TYPE = "text"
 MAX_PAGES = 60
 
-POSTGRES_DB = os.environ.get("POSTGRES_DB")
-POSTGRES_USER = os.environ.get("POSTGRES_USER")
-POSTGRES_PASSWORD = os.environ.get("POSTGRES_PASSWORD")
+DATABASE_URL = os.environ.get("DATABASE_URL")
 
 ## connect to the SQLite database
-def connect_to_database(DB_FILE_PATH):
+def connect_to_database():
      # try to connect to PostgreSQL first
     try:
-        conn = psycopg2.connect(dbname=POSTGRES_DB,
-                                user=POSTGRES_USER,
-                                password=POSTGRES_PASSWORD)
+        conn = psycopg2.connect(dsn=DATABASE_URL)
         print("Successfully connected to the PostgreSQL database.")
         return conn
     except psycopg2.Error as e:
@@ -125,7 +121,7 @@ def main():
         print(f"Database file not found at {abs_db_path}")
     else:
         ## connect to the database
-        conn = connect_to_database(DB_FILE_PATH)
+        conn = connect_to_database()
         
         if conn:
             ## delete every book from the db
