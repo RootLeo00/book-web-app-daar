@@ -40,7 +40,7 @@
         <mxCell id="w7LgpsOcl14dkoo3qkG8-10" value="Filter by pertinence" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
           <mxGeometry x="350" y="560" width="120" height="80" as="geometry" />
         </mxCell>
-        <mxCell id="w7LgpsOcl14dkoo3qkG8-11" value="Filter by occurence" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+        <mxCell id="w7LgpsOcl14dkoo3qkG8-11" value="Filter by occurrence" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
           <mxGeometry x="480" y="560" width="120" height="80" as="geometry" />
         </mxCell>
         <mxCell id="w7LgpsOcl14dkoo3qkG8-16" value="" style="endArrow=classic;html=1;rounded=0;entryX=0;entryY=1;entryDx=0;entryDy=0;exitX=0.5;exitY=0;exitDx=0;exitDy=0;dashed=1;" edge="1" parent="1" source="w7LgpsOcl14dkoo3qkG8-10" target="w7LgpsOcl14dkoo3qkG8-6">

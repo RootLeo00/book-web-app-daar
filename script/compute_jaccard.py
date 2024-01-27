@@ -26,15 +26,16 @@ def compute_jaccard_distance(conn):
     size_books = len(all_books)
 
     for book1 in all_books:
-        _, _, _, _, book1_id, _, book1_word_occurence = book1
+        print(f"{book1}")
+        _, _, _, _, book1_id, _, book1_word_occurrence = book1
         books_neighbor = []
         sum_distance = 0
 
         for book2 in all_books:
-            _, _, _, _, book2_id, _, book2_word_occurence = book2
+            _, _, _, _, book2_id, _, book2_word_occurrence = book2
             if book1_id != book2_id:
-                d1 = json.loads(book1_word_occurence)
-                d2 = json.loads(book2_word_occurence)
+                d1 = json.loads(book1_word_occurrence)
+                d2 = json.loads(book2_word_occurrence)
                 result_distance = jaccard_distance(d1, d2)
                 
                 if result_distance < TRESHOLD:

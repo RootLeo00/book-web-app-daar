@@ -2,7 +2,7 @@ from collections import Counter
 import re
 from stop_words import safe_get_stop_words
  
-def get_word_occurence(text, lang):
+def get_word_occurrence(text, lang):
     stop_words = safe_get_stop_words(lang)
     txt = text.lower()
     words = re.findall('[a-zA-Z\u00C0-\u00FF]*', txt)

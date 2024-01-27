@@ -4,7 +4,7 @@ import requests
 import logging
 import psycopg2
 from datetime import datetime
-from utils import get_word_occurence
+from utils import get_word_occurrence
 import json 
 import compute_jaccard
 
@@ -14,7 +14,7 @@ MIME_TYPE = "text"
 MAX_PAGES = os.environ.get("MAX_PAGES")
 
 if MAX_PAGES == "":
-    MAX_PAGES = 60
+    MAX_PAGES = "60"
 
 DATABASE_URL = os.environ.get("DATABASE_URL")
 
@@ -48,7 +48,7 @@ def construct_url(api_endpoint, mime_type, page):
 ## fetch all book data from a page
 def fetch_and_store_data(conn):
     page = 1
-    while page < MAX_PAGES:
+    while page < int(MAX_PAGES):
         books_url = construct_url(GUTENDEX_URL, MIME_TYPE, page)
         response = requests.get(books_url)
         print(f"Fetching books from: {books_url} ...")
@@ -97,7 +97,7 @@ def process_and_store_books(books, conn):
                                         book_instance['text'], book_instance['image_url'], book_instance['c_rank'], 
                                         book_instance['occurrence']))
         
-        word_occurence = get_word_occurence(text_response, book['languages'][0])
+        word_occurrence = get_word_occurrence(text_response, book['languages'][0])
 
         ## create a new indexed book instance
         indexed_book_instance = {
@@ -105,7 +105,7 @@ def process_and_store_books(books, conn):
             'created_at': current_time,
             'updated_at': current_time,
             'title': book['title'],
-            'word_occurrence': json.dumps(dict(word_occurence))
+            'word_occurrence': json.dumps(dict(word_occurrence))
         }
 
         ## save the book instance to database
@@ -149,3 +149,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+    import time 
+    while True: time.sleep(99999)
