@@ -1,24 +1,39 @@
 import os
 import sqlite3
 import requests
-import logging
-import ast
+import psycopg2
 from datetime import datetime
-from utils import distance_jaccard
+from utils import jaccard_distance
 import json 
 
 DB_FILE_PATH = "./db.sqlite3"
 TRESHOLD = 0.65
 
+POSTGRES_DB = os.environ.get("POSTGRES_DB")
+POSTGRES_USER = os.environ.get("POSTGRES_USER")
+POSTGRES_PASSWORD = os.environ.get("POSTGRES_PASSWORD")
+
 ## connect to the SQLite database
 def connect_to_database(DB_FILE_PATH):
+    ## try to connect to PostgreSQL first
     try:
-        conn = sqlite3.connect(DB_FILE_PATH)
-        print("Successfully connected to the database.")
-        return conn    
-    except sqlite3.Error as e:
-        print(f"Database error: {e}")
-        return None
+        conn = psycopg2.connect(dbname=POSTGRES_DB,
+                                user=POSTGRES_USER,
+                                password=POSTGRES_PASSWORD)
+        print("Successfully connected to the PostgreSQL database.")
+        return conn
+    except psycopg2.Error as e:
+        print(f"PostgreSQL Database error: {e}")
+        print("Trying to connect to SQLite database...")
+
+        ## Fallback to SQLite3
+        try:
+            conn = sqlite3.connect(DB_FILE_PATH)
+            print("Successfully connected to the SQLite database.")
+            return conn
+        except sqlite3.Error as e:
+            print(f"SQLite Database error: {e}")
+            return None
 
 
 ## computer the jaccard distance
@@ -43,7 +58,7 @@ def compute_jaccard_distance(conn):
             if book1_id != book2_id:
                 d1 = json.loads(book1_word_occurence)
                 d2 = json.loads(book2_word_occurence)
-                result_distance = distance_jaccard(d1, d2)
+                result_distance = jaccard_distance(d1, d2)
                 
                 if result_distance < TRESHOLD:
                     books_neighbor.append(book2_id)

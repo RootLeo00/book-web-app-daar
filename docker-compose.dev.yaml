@@ -43,6 +43,16 @@ services:
       - pgadmin_data:/var/lib/pgadmin
     depends_on:
       - database
+  python-scripts:
+    build:
+      context: ./python_scripts
+      dockerfile: Dockerfile
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    depends_on:
+      - database
 volumes:
   postgres_data:
   pgadmin_data:
