@@ -6,16 +6,21 @@ import psycopg2
 from datetime import datetime
 from utils import get_word_occurence
 import json 
+import compute_jaccard
 
 DB_FILE_PATH = "../backend/db.sqlite3"
 GUTENDEX_URL = "https://gutendex.com/books"
 MIME_TYPE = "text"
-MAX_PAGES = 60
+MAX_PAGES = os.environ.get("MAX_PAGES")
+
+if MAX_PAGES == "":
+    MAX_PAGES = 60
 
 DATABASE_URL = os.environ.get("DATABASE_URL")
 
 ## connect to the SQLite database
 def connect_to_database():
+    print("I tried realy hard")
      # try to connect to PostgreSQL first
     try:
         conn = psycopg2.connect(dsn=DATABASE_URL)
@@ -86,7 +91,7 @@ def process_and_store_books(books, conn):
 
         ## save the book instance to database
         insert_book_query = """INSERT INTO books (created_at, updated_at, book_id, title, author, language, text, image_url, c_rank, occurrence)
-                          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"""
+                          VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
         cursor.execute(insert_book_query, (book_instance['created_at'], book_instance['updated_at'], book_instance['book_id'],
                                         book_instance['title'], book_instance['author'], book_instance['language'], 
                                         book_instance['text'], book_instance['image_url'], book_instance['c_rank'], 
@@ -105,7 +110,7 @@ def process_and_store_books(books, conn):
 
         ## save the book instance to database
         insert_indexed_book_query = """INSERT INTO indexed_books (created_at, updated_at, title, word_occurrence_json, book_id)
-                          VALUES (?, ?, ?, ?, ?)"""
+                          VALUES (%s, %s, %s, %s, %s)"""
         cursor.execute(insert_indexed_book_query, (indexed_book_instance['created_at'], indexed_book_instance['updated_at'],
                                                    indexed_book_instance['title'], indexed_book_instance['word_occurrence'],
                                                    indexed_book_instance['book_id']))
@@ -114,35 +119,33 @@ def process_and_store_books(books, conn):
 
 
 def main():
+    ## connect to the database
+    conn = connect_to_database()
+    
+    if conn:
+        ## delete every book from the db
+        delete_books_query = 'DELETE FROM books'
+        delete_indexed_books_query = 'DELETE FROM indexed_books'
 
-    abs_db_path = os.path.abspath(DB_FILE_PATH)
+        try: 
+            cursor = conn.cursor()
+            cursor.execute(delete_books_query)
+            cursor.execute(delete_indexed_books_query)
+            conn.commit()
+        except Exception as e:
+            print("An error occured while deleting.")
 
-    if not os.path.exists(abs_db_path):
-        print(f"Database file not found at {abs_db_path}")
-    else:
-        ## connect to the database
-        conn = connect_to_database()
+        ## fetch books from Gutenberg Project
+        fetch_and_store_data(conn)
+        print("All books successfully added to database.")
+
+        compute_jaccard.compute_jaccard_distance(conn)
         
-        if conn:
-            ## delete every book from the db
-            delete_books_query = 'DELETE FROM books'
-            delete_indexed_books_query = 'DELETE FROM indexed_books'
-
-            try: 
-                cursor = conn.cursor()
-                cursor.execute(delete_books_query)
-                cursor.execute(delete_indexed_books_query)
-                conn.commit()
-            except Exception as e:
-                print("An error occured while deleting.")
-
-            ## fetch books from Gutenberg Project
-            fetch_and_store_data(conn)
-            print("All books successfully added to database.")
-            
-            ## close database connection
-            conn.close()
-            print("Database connection closed.")
+        ## close database connection
+        conn.close()
+        print("Database connection closed.")
+    else:
+        print("Hatme jeeb")
 
 if __name__ == "__main__":
     main()

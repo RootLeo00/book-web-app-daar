@@ -8,7 +8,7 @@ WORKDIR /app
 COPY . .
 
 # Install any needed packages specified in requirements.txt
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install -r requirements.txt
 
 # Run app.py when the container launches
-CMD ["sh", "-c", "python3 sync_books.py && python3 compute_jaccard.py"]
+CMD ["python3", "sync_books.py", "&&", "python3", "compute_jaccard.py"]
