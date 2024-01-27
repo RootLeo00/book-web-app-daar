@@ -1,6 +1,3 @@
 requests
 psycopg2
-sqlite3
-json
-datetime
-stopwords
+stop-words

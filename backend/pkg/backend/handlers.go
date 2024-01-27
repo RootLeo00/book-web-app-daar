@@ -76,7 +76,7 @@ func (h *handler) SearchHandler(context *gin.Context) {
 
 	// For each book calculate
 	for _, indexedBook := range indexedBooks {
-		// Get the World occurance json
+		// Get the World occurrence json
 		var wordOccurrencesMap map[string]uint
 		err := json.Unmarshal([]byte(indexedBook.WordOccurrenceJSON), &wordOccurrencesMap)
 
@@ -86,19 +86,19 @@ func (h *handler) SearchHandler(context *gin.Context) {
 		}
 
 		if count, ok := wordOccurrencesMap[query]; ok {
-			// Update the occurance count of the books, bad performance!
+			// Update the occurrence count of the books, bad performance!
 			var book Book
-			h.db.First(&book, indexedBook.ID)
+			h.db.Where("book_id = ?", indexedBook.BookID).First(&book)
 			book.Occurrence = count
 			h.db.Save(&book)
 
 			// Append this book to the book ids
-			bookIds.Insert(indexedBook.ID)
+			bookIds.Insert(indexedBook.BookID)
 			returnBooks.Insert(book)
 
 			// Add neighbors
 			var jaccardNeighbors JaccardNeighbors
-			h.db.First(&jaccardNeighbors, indexedBook.ID)
+			h.db.Where("book_id = ?", indexedBook.BookID).First(&jaccardNeighbors)
 
 			var neighbors []uint
 			err := json.Unmarshal([]byte(jaccardNeighbors.NeighborsJSON), &neighbors)
@@ -115,22 +115,22 @@ func (h *handler) SearchHandler(context *gin.Context) {
 	// Get only the negigbor ones
 	onlyNeigbors := neighborIds.Difference(bookIds)
 
-	// Get the occurance names
-	var occuranceBooks []Book
-	h.db.Where("id in ?", onlyNeigbors.Slice()).Find(&occuranceBooks)
+	// Get the occurrence names
+	var occurrenceBooks []Book
+	h.db.Where("id in ?", onlyNeigbors.Slice()).Find(&occurrenceBooks)
 
-	// Set all the occurances to zero
-	for _, element := range occuranceBooks {
+	// Set all the occurrences to zero
+	for _, element := range occurrenceBooks {
 		element.Occurrence = 0
 	}
 
-	// Update the occurances according to zero
-	h.db.Updates(occuranceBooks)
+	// Update the occurrences according to zero
+	h.db.Updates(occurrenceBooks)
 
 	// Now get the neigboring books
 	context.JSON(http.StatusOK, map[string]any{
 		"books":     returnBooks,
-		"neighbors": occuranceBooks,
+		"neighbors": occurrenceBooks,
 	})
 }
 
@@ -157,7 +157,7 @@ func (h *handler) RegexSearchHandler(context *gin.Context) {
 
 	// For each book calculate
 	for _, indexedBook := range indexedBooks {
-		// Get the World occurance json
+		// Get the World occurrence json
 		var wordOccurrencesMap map[string]uint
 		err := json.Unmarshal([]byte(indexedBook.WordOccurrenceJSON), &wordOccurrencesMap)
 
@@ -166,9 +166,9 @@ func (h *handler) RegexSearchHandler(context *gin.Context) {
 			return
 		}
 
-		// Update the occurance count of the books, bad performance!
+		// Update the occurrence count of the books, bad performance!
 		var book Book
-		h.db.First(&book, indexedBook.ID)
+		h.db.Where("book_id = ?", indexedBook.BookID).First(&book)
 		count := uint(len(expression.FindAllStringIndex(book.Text, -1)))
 
 		if count != 0 {
@@ -176,12 +176,12 @@ func (h *handler) RegexSearchHandler(context *gin.Context) {
 			h.db.Save(&book)
 
 			// Append this book to the book ids
-			bookIds.Insert(indexedBook.ID)
+			bookIds.Insert(indexedBook.BookID)
 			returnBooks.Insert(book)
 
 			// Add neighbors
 			var jaccardNeighbors JaccardNeighbors
-			h.db.First(&jaccardNeighbors, indexedBook.ID)
+			h.db.Where("book_id = ?", indexedBook.BookID).First(&jaccardNeighbors)
 
 			var neighbors []uint
 			err = json.Unmarshal([]byte(jaccardNeighbors.NeighborsJSON), &neighbors)
@@ -199,21 +199,21 @@ func (h *handler) RegexSearchHandler(context *gin.Context) {
 	// Get only the negigbor ones
 	onlyNeigbors := neighborIds.Difference(bookIds)
 
-	// Get the occurance names
-	var occuranceBooks []Book
-	h.db.Where("id in ?", onlyNeigbors.Slice()).Find(&occuranceBooks)
+	// Get the occurrence names
+	var occurrenceBooks []Book
+	h.db.Where("id in ?", onlyNeigbors.Slice()).Find(&occurrenceBooks)
 
-	// Set all the occurances to zero
-	for _, element := range occuranceBooks {
+	// Set all the occurrences to zero
+	for _, element := range occurrenceBooks {
 		element.Occurrence = 0
 	}
 
-	// Update the occurances according to zero
-	h.db.Updates(occuranceBooks)
+	// Update the occurrences according to zero
+	h.db.Updates(occurrenceBooks)
 
 	// Now get the neigboring books
 	context.JSON(http.StatusOK, map[string]any{
 		"books":     returnBooks,
-		"neighbors": occuranceBooks,
+		"neighbors": occurrenceBooks,
 	})
 }
