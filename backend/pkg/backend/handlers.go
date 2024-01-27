@@ -168,7 +168,7 @@ func (h *handler) RegexSearchHandler(context *gin.Context) {
 
 		// Update the occurrence count of the books, bad performance!
 		var book Book
-		h.db.First(&book, indexedBook.BookID)
+		h.db.Where("book_id = ?", indexedBook.BookID).First(&book)
 		count := uint(len(expression.FindAllStringIndex(book.Text, -1)))
 
 		if count != 0 {
@@ -181,7 +181,7 @@ func (h *handler) RegexSearchHandler(context *gin.Context) {
 
 			// Add neighbors
 			var jaccardNeighbors JaccardNeighbors
-			h.db.First(&jaccardNeighbors, indexedBook.BookID)
+			h.db.Where("book_id = ?", indexedBook.BookID).First(&jaccardNeighbors)
 
 			var neighbors []uint
 			err = json.Unmarshal([]byte(jaccardNeighbors.NeighborsJSON), &neighbors)
