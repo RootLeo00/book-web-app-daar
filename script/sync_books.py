@@ -126,11 +126,13 @@ def main():
         ## delete every book from the db
         delete_books_query = 'DELETE FROM books'
         delete_indexed_books_query = 'DELETE FROM indexed_books'
+        delete_jaccard_neighbors_query = 'DELETE FROM jaccard_neighbors'
 
         try: 
             cursor = conn.cursor()
             cursor.execute(delete_books_query)
             cursor.execute(delete_indexed_books_query)
+            cursor.execute(delete_jaccard_neighbors_query)
             conn.commit()
         except Exception as e:
             print("An error occured while deleting.")

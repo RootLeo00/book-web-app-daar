@@ -19,7 +19,7 @@ def compute_jaccard_distance(conn):
     sum_distance = 0
             
     ## fetch data from db
-    query = "SELECT * FROM indexed_books;"  
+    query = "SELECT book_id, word_occurrence_json FROM indexed_books;"  
     cursor.execute(query)
     print("Query executed")
     all_books = cursor.fetchall()
@@ -27,12 +27,12 @@ def compute_jaccard_distance(conn):
 
     for book1 in all_books:
         print(f"{book1}")
-        _, _, _, _, book1_id, _, book1_word_occurrence = book1
+        book1_id, book1_word_occurrence = book1
         books_neighbor = []
         sum_distance = 0
 
         for book2 in all_books:
-            _, _, _, _, book2_id, _, book2_word_occurrence = book2
+            book2_id, book2_word_occurrence = book2
             if book1_id != book2_id:
                 d1 = json.loads(book1_word_occurrence)
                 d2 = json.loads(book2_word_occurrence)
@@ -55,8 +55,10 @@ def compute_jaccard_distance(conn):
         ## save jaccard neighbors to database
         insert_neighbors_query = """INSERT INTO jaccard_neighbors (created_at, updated_at, neighbors_json, book_id)
                         VALUES (%s, %s, %s, %s)"""
-        cursor.execute(insert_neighbors_query, (jaccard_neighbors_instance['created_at'], jaccard_neighbors_instance['updated_at'],
-                                            jaccard_neighbors_instance['neighbors'], jaccard_neighbors_instance['book_id']))
+        cursor.execute(insert_neighbors_query, (jaccard_neighbors_instance['created_at'], 
+                                                jaccard_neighbors_instance['updated_at'],
+                                                jaccard_neighbors_instance['neighbors'], 
+                                                jaccard_neighbors_instance['book_id']))
         
         crank = (size_books - 1) / sum_distance
         cursor.execute(f"UPDATE books SET c_rank = %s WHERE book_id = %s", (crank, book1_id))

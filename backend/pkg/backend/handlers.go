@@ -88,17 +88,17 @@ func (h *handler) SearchHandler(context *gin.Context) {
 		if count, ok := wordOccurrencesMap[query]; ok {
 			// Update the occurrence count of the books, bad performance!
 			var book Book
-			h.db.First(&book, indexedBook.ID)
+			h.db.Where("book_id = ?", indexedBook.BookID).First(&book)
 			book.Occurrence = count
 			h.db.Save(&book)
 
 			// Append this book to the book ids
-			bookIds.Insert(indexedBook.ID)
+			bookIds.Insert(indexedBook.BookID)
 			returnBooks.Insert(book)
 
 			// Add neighbors
 			var jaccardNeighbors JaccardNeighbors
-			h.db.First(&jaccardNeighbors, indexedBook.ID)
+			h.db.Where("book_id = ?", indexedBook.BookID).First(&jaccardNeighbors)
 
 			var neighbors []uint
 			err := json.Unmarshal([]byte(jaccardNeighbors.NeighborsJSON), &neighbors)
@@ -168,7 +168,7 @@ func (h *handler) RegexSearchHandler(context *gin.Context) {
 
 		// Update the occurrence count of the books, bad performance!
 		var book Book
-		h.db.First(&book, indexedBook.ID)
+		h.db.First(&book, indexedBook.BookID)
 		count := uint(len(expression.FindAllStringIndex(book.Text, -1)))
 
 		if count != 0 {
@@ -176,12 +176,12 @@ func (h *handler) RegexSearchHandler(context *gin.Context) {
 			h.db.Save(&book)
 
 			// Append this book to the book ids
-			bookIds.Insert(indexedBook.ID)
+			bookIds.Insert(indexedBook.BookID)
 			returnBooks.Insert(book)
 
 			// Add neighbors
 			var jaccardNeighbors JaccardNeighbors
-			h.db.First(&jaccardNeighbors, indexedBook.ID)
+			h.db.First(&jaccardNeighbors, indexedBook.BookID)
 
 			var neighbors []uint
 			err = json.Unmarshal([]byte(jaccardNeighbors.NeighborsJSON), &neighbors)
