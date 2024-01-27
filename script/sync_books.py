@@ -1,5 +1,5 @@
 import os
-import sqlite3
+# import sqlite3
 import requests
 import logging
 import psycopg2
@@ -25,14 +25,14 @@ def connect_to_database():
         print(f"PostgreSQL Database error: {e}")
         print("Trying to connect to SQLite database...")
 
-        # Fallback to SQLite3
-        try:
-            conn = sqlite3.connect(DB_FILE_PATH)
-            print("Successfully connected to the SQLite database.")
-            return conn
-        except sqlite3.Error as e:
-            print(f"SQLite Database error: {e}")
-            return None
+        # # Fallback to SQLite3
+        # try:
+        #     conn = sqlite3.connect(DB_FILE_PATH)
+        #     print("Successfully connected to the SQLite database.")
+        #     return conn
+        # except sqlite3.Error as e:
+        #     print(f"SQLite Database error: {e}")
+        #     return None
     
 
 ## construct the URL for the current page
@@ -133,7 +133,7 @@ def main():
                 cursor.execute(delete_books_query)
                 cursor.execute(delete_indexed_books_query)
                 conn.commit()
-            except sqlite3.Error as e:
+            except Exception as e:
                 print("An error occured while deleting.")
 
             ## fetch books from Gutenberg Project

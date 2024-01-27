@@ -1,5 +1,5 @@
 import os
-import sqlite3
+# import sqlite3
 import requests
 import psycopg2
 from datetime import datetime
@@ -26,14 +26,14 @@ def connect_to_database(DB_FILE_PATH):
         print(f"PostgreSQL Database error: {e}")
         print("Trying to connect to SQLite database...")
 
-        ## Fallback to SQLite3
-        try:
-            conn = sqlite3.connect(DB_FILE_PATH)
-            print("Successfully connected to the SQLite database.")
-            return conn
-        except sqlite3.Error as e:
-            print(f"SQLite Database error: {e}")
-            return None
+    #     ## Fallback to SQLite3
+    #     try:
+    #         conn = sqlite3.connect(DB_FILE_PATH)
+    #         print("Successfully connected to the SQLite database.")
+    #         return conn
+    #     except sqlite3.Error as e:
+    #         print(f"SQLite Database error: {e}")
+    #         return None
 
 
 ## computer the jaccard distance
@@ -107,7 +107,7 @@ def main():
                 cursor = conn.cursor()
                 cursor.execute(delete_jaccard_distance_query)
                 conn.commit()
-            except sqlite3.Error as e:
+            except Exception as e:
                 print("An error occured while deleting.")
 
             ## fetch books from Gutenberg Project
