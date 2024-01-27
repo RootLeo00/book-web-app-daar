@@ -2,24 +2,41 @@ import os
 import sqlite3
 import requests
 import logging
+import psycopg2
 from datetime import datetime
-from utils import getWordsWithOcc
+from utils import get_word_occurence
 import json 
 
-DB_FILE_PATH = "./db.sqlite3"
+DB_FILE_PATH = "../backend/db.sqlite3"
 GUTENDEX_URL = "https://gutendex.com/books"
 MIME_TYPE = "text"
 MAX_PAGES = 60
 
+POSTGRES_DB = os.environ.get("POSTGRES_DB")
+POSTGRES_USER = os.environ.get("POSTGRES_USER")
+POSTGRES_PASSWORD = os.environ.get("POSTGRES_PASSWORD")
+
 ## connect to the SQLite database
 def connect_to_database(DB_FILE_PATH):
+     # try to connect to PostgreSQL first
     try:
-        conn = sqlite3.connect(DB_FILE_PATH)
-        print("Successfully connected to the database.")
-        return conn    
-    except sqlite3.Error as e:
-        print(f"Database error: {e}")
-        return None
+        conn = psycopg2.connect(dbname=POSTGRES_DB,
+                                user=POSTGRES_USER,
+                                password=POSTGRES_PASSWORD)
+        print("Successfully connected to the PostgreSQL database.")
+        return conn
+    except psycopg2.Error as e:
+        print(f"PostgreSQL Database error: {e}")
+        print("Trying to connect to SQLite database...")
+
+        # Fallback to SQLite3
+        try:
+            conn = sqlite3.connect(DB_FILE_PATH)
+            print("Successfully connected to the SQLite database.")
+            return conn
+        except sqlite3.Error as e:
+            print(f"SQLite Database error: {e}")
+            return None
     
 
 ## construct the URL for the current page
@@ -79,7 +96,7 @@ def process_and_store_books(books, conn):
                                         book_instance['text'], book_instance['image_url'], book_instance['c_rank'], 
                                         book_instance['occurrence']))
         
-        word_occurence = getWordsWithOcc(text_response, book['languages'][0])
+        word_occurence = get_word_occurence(text_response, book['languages'][0])
 
         ## create a new indexed book instance
         indexed_book_instance = {
