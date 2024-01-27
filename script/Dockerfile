@@ -11,4 +11,4 @@ COPY . .
 RUN pip install -r requirements.txt
 
 # Run app.py when the container launches
-CMD ["python3", "sync_books.py", "&&", "python3", "compute_jaccard.py"]
+CMD ["python3", "sync_books.py"]
