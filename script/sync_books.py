@@ -64,15 +64,21 @@ def process_and_store_books(books, conn):
 
     ## manipulation of JSON data
     for book in books:
+        url_text = None 
+        for key in book['formats'].keys():
+            if "text/plain" in key:
+                url_text = book['formats'][key]
+    
+        if url_text:
+            url_text = url_text.replace('.zip', '.txt')
+        else:
+            print("cannot get the context of the book, skipping...")
+            continue
 
         author = 'None'
         if book['authors']:
             author = book['authors'][0]['name']
-
-        url_text = book['formats'].get('text/plain; charset=us-ascii', None)
         
-        if url_text:
-            url_text = url_text.replace('.zip', '.txt')
         text_response = requests.get(url_text)
 
         if text_response.status_code == 200:
