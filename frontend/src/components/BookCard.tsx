@@ -25,7 +25,7 @@ const BookCard = ({ cardData }: any) => {
             />
             <CardContent>
                 <Typography variant="body2" color="text.secondary">
-                    {cardData?.text}
+                    {/* {cardData?.text} */}
                 </Typography>
                 <Typography variant="caption" color="text.secondary">
                     Crank: {cardData?.crank}

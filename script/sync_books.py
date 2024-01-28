@@ -46,7 +46,7 @@ def construct_url(api_endpoint, mime_type, page):
 ## fetch all book data from a page
 def fetch_and_store_data(conn):
     page = 1
-    while page < 60:
+    while page < int(MAX_PAGES):
         books_url = construct_url(GUTENDEX_URL, MIME_TYPE, page)
         response = requests.get(books_url)
         print(f"Fetching books from: {books_url} ...")
@@ -165,5 +165,5 @@ def main():
 
 if __name__ == "__main__":
     main()
-    import time 
-    while True: time.sleep(99999)
+    # import time 
+    # while True: time.sleep(99999)

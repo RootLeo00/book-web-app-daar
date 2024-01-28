@@ -8,7 +8,7 @@ services:
     ports:
       - "3000:3000"  # Expose the frontend on port 3000
     environment:
-      - BACKEND_URL=backend
+      - BACKEND_URL=localhost
     depends_on:
       - backend
   backend:
@@ -47,10 +47,10 @@ services:
     build:
       context: ./script
       dockerfile: Dockerfile
-    # restart: nosS
+    restart: no
     environment:
       - DATABASE_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@database:5432/${POSTGRES_DB}
-      - MAX_PAGES=60
+      - MAX_PAGES=2
     depends_on:
       - database
 volumes:
