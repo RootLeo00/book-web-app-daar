@@ -50,7 +50,7 @@ services:
     restart: no
     environment:
       - DATABASE_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@database:5432/${POSTGRES_DB}
-      - MAX_PAGES=2
+      - MAX_PAGES=60
     depends_on:
       - database
 volumes:
