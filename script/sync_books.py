@@ -72,7 +72,10 @@ def process_and_store_books(books, conn):
         author = 'None'
         if book['authors']:
             author = book['authors'][0]['name']
-        text_response = book['title'] + " " + " ".join(book['subjects'])
+        #text_response = book['title'] + " " + " ".join(book['subjects'])
+        text_response = requests.get(url_text)
+        text_in_words = text_response.text.split
+        book_text= ' '.join(text_in_words[:10000])
         current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")
 
         ## create a new book instance
@@ -83,7 +86,7 @@ def process_and_store_books(books, conn):
             'title': book['title'],
             'author': author,
             'language': book['languages'][0],
-            'text': text_response,      # this is not the actual text
+            'text': book_text,      # this is not the actual text
             'image_url': book['formats'].get('image/jpeg', None),
             'c_rank': 0.0,
             'occurrence': 0
@@ -97,7 +100,7 @@ def process_and_store_books(books, conn):
                                         book_instance['text'], book_instance['image_url'], book_instance['c_rank'], 
                                         book_instance['occurrence']))
         
-        word_occurrence = get_word_occurrence(text_response, book['languages'][0])
+        word_occurrence = get_word_occurrence(book_text, book['languages'][0])
 
         ## create a new indexed book instance
         indexed_book_instance = {
