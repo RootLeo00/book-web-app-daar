@@ -74,7 +74,7 @@ def process_and_store_books(books, conn):
             author = book['authors'][0]['name']
         #text_response = book['title'] + " " + " ".join(book['subjects'])
         text_response = requests.get(url_text)
-        text_in_words = text_response.text.split
+        text_in_words = text_response.text.split()
         book_text= ' '.join(text_in_words[:10000])
         current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")
 
