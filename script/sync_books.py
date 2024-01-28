@@ -6,14 +6,19 @@ from datetime import datetime
 from utils import get_word_occurrence
 import json 
 import compute_jaccard
+import sys 
 
 DB_FILE_PATH = "../backend/db.sqlite3"
 GUTENDEX_URL = "https://gutendex.com/books"
 MIME_TYPE = "text"
 MAX_PAGES = os.environ.get("MAX_PAGES")
+MAX_WORDS = os.environ.get("MAX_WORDS")
 
 if MAX_PAGES == "":
     MAX_PAGES = "60"
+
+if MAX_WORDS == "":
+    MAX_WORDS = "10000"
 
 DATABASE_URL = os.environ.get("DATABASE_URL")
 
@@ -83,7 +88,7 @@ def process_and_store_books(books, conn):
 
         if text_response.status_code == 200:
             text_in_words = text_response.text.split()
-            book_text= ' '.join(text_in_words[:10000])
+            book_text= ' '.join(text_in_words[:int(MAX_WORDS)])
         else: 
             book_text = book['title'] + " " + " ".join(book['subjects'])
 
@@ -128,6 +133,9 @@ def process_and_store_books(books, conn):
         cursor.execute(insert_indexed_book_query, (indexed_book_instance['created_at'], indexed_book_instance['updated_at'],
                                                    indexed_book_instance['title'], indexed_book_instance['word_occurrence'],
                                                    indexed_book_instance['book_id']))
+        
+        print("Book added...")
+        sys.stdout.flush()
 
     conn.commit()
 
@@ -143,11 +151,12 @@ def main():
         delete_jaccard_neighbors_query = 'DELETE FROM jaccard_neighbors'
 
         try: 
-            cursor = conn.cursor()
-            cursor.execute(delete_books_query)
-            cursor.execute(delete_indexed_books_query)
-            cursor.execute(delete_jaccard_neighbors_query)
-            conn.commit()
+            # cursor = conn.cursor()
+            # cursor.execute(delete_books_query)
+            # cursor.execute(delete_indexed_books_query)
+            # cursor.execute(delete_jaccard_neighbors_query)
+            # conn.commit()
+            ...
         except Exception as e:
             print("An error occured while deleting.")
 

@@ -32,6 +32,7 @@ services:
     ports:
       - "5432:5432"
   pgadmin:
+    attach: false
     image: dpage/pgadmin4
     restart: always
     environment:
@@ -43,16 +44,17 @@ services:
       - pgadmin_data:/var/lib/pgadmin
     depends_on:
       - database
-  scripts:
-    build:
-      context: ./script
-      dockerfile: Dockerfile
-    restart: no
-    environment:
-      - DATABASE_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@database:5432/${POSTGRES_DB}
-      - MAX_PAGES=60
-    depends_on:
-      - database
+  # scripts:
+  #   build:
+  #     context: ./script
+  #     dockerfile: Dockerfile
+  #   restart: no
+  #   environment:
+  #     - DATABASE_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@database:5432/${POSTGRES_DB}
+  #     - MAX_PAGES=60
+  #     - MAX_WORDS=10000
+  #   depends_on:
+  #     - database
 volumes:
   postgres_data:
   pgadmin_data:
