@@ -12,7 +12,7 @@ import { FormControl, Radio, RadioGroup } from '@mui/material';
 
 const HomePage = () => {
     const [data, setData] = useState<IBook[]>([]);
-    const [inputNameBook, setInputNameBook] = useState<string>("");
+    const [inputString, setInputString] = useState<string>("");
     const [inputRegex, setInputRegex] = useState<string>("");
     const [suggestions, setSuggestions] = useState<IBook[]>([]);
     const [numberOfBooks, setNumberOfBooks] = useState<number>(5);
@@ -26,7 +26,7 @@ const HomePage = () => {
             if (regex) {
                 console.log("searching for regex: ", word)
                 bookService.searchBookRegex(word)
-                    .then(async (res) => {
+                    .then(async (res) => {  
                         const obj = await JSON.parse(JSON.stringify(res))
                         setData(obj.books);
                         setSuggestions(obj.neighbors);
@@ -34,7 +34,7 @@ const HomePage = () => {
                     })
             }
             else {
-                console.log("searching for name: ", word)
+                console.log("searching for string: ", word)
                 bookService.searchBook(word)
                     .then(async (res) => {
                         console.log(res)
@@ -85,25 +85,25 @@ const HomePage = () => {
             <div style={{ display: 'flex', alignItems: 'center' }}>
                 <TextField
                     type="text"
-                    id="namebook_res"
-                    label="Name of the Book to Search"
+                    id="string_res"
+                    label="String to Search"
                     color='warning'
-                    value={inputNameBook}
-                    onChange={(e) => { setInputNameBook(e.target.value) }}
+                    value={inputString}
+                    onChange={(e) => { setInputString(e.target.value) }}
                 />
-                <Button onClick={() => getbooks(inputNameBook, false)}>Search Book Name</Button>
+                <Button onClick={() => getbooks(inputString, false)}>Search String</Button>
             </div>
 
             <div style={{ display: 'flex', alignItems: 'center' }}>
                 <TextField
                     type="text"
                     id="regex_res"
-                    label="String to Search in all of the Books"
+                    label="Regex to Search"
                     color='warning'
                     value={inputRegex}
                     onChange={(e) => { setInputRegex(e.target.value) }}
                 />
-                <Button onClick={() => getbooks(inputRegex, true)}>Search String</Button>
+                <Button onClick={() => getbooks(inputRegex, true)}>Search RegEx</Button>
             </div>
             <br />
             <br />

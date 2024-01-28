@@ -30,6 +30,10 @@ const BookCard = ({ cardData }: any) => {
                 <Typography variant="caption" color="text.secondary">
                     Crank: {cardData?.crank}
                 </Typography>
+                <br></br>
+                <Typography variant="caption" color="text.secondary">
+                    Occurrence: {cardData?.occurrence}
+                </Typography>
             </CardContent>
         </Card>
     ) : (<p>loading card</p>))
