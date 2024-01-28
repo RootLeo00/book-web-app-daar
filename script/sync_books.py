@@ -1,5 +1,5 @@
 import os
-# import sqlite3
+import sqlite3
 import requests
 import logging
 import psycopg2
@@ -20,7 +20,6 @@ DATABASE_URL = os.environ.get("DATABASE_URL")
 
 ## connect to the SQLite database
 def connect_to_database():
-    print("I tried realy hard")
      # try to connect to PostgreSQL first
     try:
         conn = psycopg2.connect(dsn=DATABASE_URL)
@@ -30,15 +29,15 @@ def connect_to_database():
         print(f"PostgreSQL Database error: {e}")
         print("Trying to connect to SQLite database...")
 
-        # # Fallback to SQLite3
-        # try:
-        #     conn = sqlite3.connect(DB_FILE_PATH)
-        #     print("Successfully connected to the SQLite database.")
-        #     return conn
-        # except sqlite3.Error as e:
-        #     print(f"SQLite Database error: {e}")
-        #     return None
-    
+    # Fallback to SQLite3
+    # try:
+    #     conn = sqlite3.connect(DB_FILE_PATH)
+    #     print("Successfully connected to the SQLite database.")
+    #     return conn
+    # except sqlite3.Error as e:
+    #     print(f"SQLite Database error: {e}")
+    #     return None
+
 
 ## construct the URL for the current page
 def construct_url(api_endpoint, mime_type, page):
@@ -48,7 +47,7 @@ def construct_url(api_endpoint, mime_type, page):
 ## fetch all book data from a page
 def fetch_and_store_data(conn):
     page = 1
-    while page < int(MAX_PAGES):
+    while page < 10:
         books_url = construct_url(GUTENDEX_URL, MIME_TYPE, page)
         response = requests.get(books_url)
         print(f"Fetching books from: {books_url} ...")
@@ -66,16 +65,23 @@ def process_and_store_books(books, conn):
 
     ## manipulation of JSON data
     for book in books:
-        url_text = book['formats'].get('text/plain; charset=us-ascii', None)
-        if url_text:
-            url_text = url_text.replace('.zip', '.txt')
+
         author = 'None'
         if book['authors']:
             author = book['authors'][0]['name']
-        #text_response = book['title'] + " " + " ".join(book['subjects'])
+
+        url_text = book['formats'].get('text/plain; charset=us-ascii', None)
+        
+        if url_text:
+            url_text = url_text.replace('.zip', '.txt')
         text_response = requests.get(url_text)
-        text_in_words = text_response.text.split()
-        book_text= ' '.join(text_in_words[:10000])
+
+        if text_response.status_code == 200:
+            text_in_words = text_response.text.split()
+            book_text= ' '.join(text_in_words[:10000])
+        else: 
+            book_text = book['title'] + " " + " ".join(book['subjects'])
+
         current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")
 
         ## create a new book instance
