@@ -31,7 +31,7 @@ def compute_jaccard_distance(conn):
 
         for book2 in all_books:
             book2_id, book2_word_occurrence = book2
-            if book1_id < book2_id:
+            if book1_id != book2_id:
                 d1 = json.loads(book1_word_occurrence)
                 d2 = json.loads(book2_word_occurrence)
                 result_distance = jaccard_distance(d1, d2)
