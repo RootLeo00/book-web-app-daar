@@ -1,5 +1,4 @@
 import os
-import sqlite3
 import requests
 import logging
 import psycopg2
