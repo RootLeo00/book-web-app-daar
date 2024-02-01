@@ -1,7 +1,7 @@
 # DAAR Choice A
 Group members:
     - Ufuk BOMBAR
-    - Caterina Leonelli
+    - Caterina LEONELLI
     - Elif OHRI
 
 # Project Introduction
@@ -77,7 +77,7 @@ The zip file should contain the README.md, report.pdf, video.mp4.
 
 # Links
 Github project: https://github.com/RootLeo00/book-web-app-daar
-Youtube Video Pitch: https://youtu.be/NCjLZ_Y1YkQ
+Youtube Video Pitch: https://youtu.be/czlfpOTtjmI
 
 # Conclusion
 The execution of this project has deepened our understanding of efficient result classification and,
