@@ -34,6 +34,13 @@ For non-dockerized tests and runs:
 - Script: The script cannot be run outside container, we designed it to be run as a container.
 
 # How to Setup
+Before running you need to create a `.env` file. This should contain the following env variables. 
+```bash
+POSTGRES_DB=postgres_database
+POSTGRES_USER=daar_user
+POSTGRES_PASSWORD=<your random password here>
+```
+
 The project uses _docker_ to run it's components in containers. The files to _build_, _start, and _stop_ the system can be found in the make file. You can use the following command to run the whole project. (Note that the preprocessing of the book data takes ~2 hours since the full text also downloaded. This is why we also provide a backup version of the postgres database. However we haven't included in the zip since it is very large ~100Mb. If requested this can be provided.)
 
 To build the project
